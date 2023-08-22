@@ -29,7 +29,7 @@ public class ManagerDb {
 					
 					
 		}catch (Exception e) {
-			throw new RuntimeException("Ocorreu um erro de conex�o "
+			throw new RuntimeException("Ocorreu um erro de conexão "
 					+ "com o banco de dados. Motivo: " + e.getMessage());
 		}
 	}

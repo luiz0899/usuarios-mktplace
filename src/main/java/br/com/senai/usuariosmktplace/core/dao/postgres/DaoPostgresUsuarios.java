@@ -3,6 +3,8 @@ package br.com.senai.usuariosmktplace.core.dao.postgres;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.com.senai.usuariosmktplace.core.dao.DaoUsuario;
 import br.com.senai.usuariosmktplace.core.dao.ManagerDb;
@@ -10,13 +12,15 @@ import br.com.senai.usuariosmktplace.core.domain.Usuario;
 
 public class DaoPostgresUsuarios implements DaoUsuario {
 	
-	private final String INSERT  = "INSERT INTO usuario (login, nome ,senha ) VALUES (?,?,?) ";
+	private final String INSERT  = "INSERT INTO usuarios (login, nome ,senha ) VALUES (?,?,?) ";
 	
 	private final String UPDATE = "UPDATE usuarios SET nome = ? , senha = ? WHERE login = ? " ; 
 
 	private final String SELECT_BY_LOGIN = "SELECT u.login, u.nome , u.senha "
 										+" FROM  usuarios u "
 										+"WHERE u.login = ? " ;
+	
+	private final String LIST_USUARIO = "SELECT * FROM usuarios u";
 	
 	private Connection conexao ;
 	
@@ -37,6 +41,27 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 			ps.setString(1,usuario.getLogin());
 			ps.setString(2,usuario.getNomeCompleto());
 			ps.setString(3,usuario.getSenha());
+			ps.execute();
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Ocorreu um erro ao inserir o usuário . Motivo : " + e.getMessage());
+		}finally {
+			ManagerDb.getInstance().fechar(ps);
+		}
+			
+	}
+	
+	@Override
+	public void inserirUsuario(String login ,String nomeCompleto ,String senha) {
+		
+		PreparedStatement ps = null ;
+		
+		try {
+			
+			ps = conexao.prepareStatement(INSERT);
+			ps.setString(1,login);
+			ps.setString(2,nomeCompleto);
+			ps.setString(3,senha);
 			ps.execute();
 			
 		} catch (Exception e) {
@@ -101,7 +126,34 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 		}
 	}
 	
+	public List<Usuario> listarPorLogin() {
+			
+			
+			List<Usuario> usuarios = new ArrayList<Usuario>();
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			try {
+				
+				ps = conexao.prepareStatement(LIST_USUARIO);
+				rs = ps.executeQuery();
+				
+				while (rs.next()) {
+					
+					usuarios.add(extrairDo(rs));
+					
+				}
+				
+			}catch (Exception e) {
+				throw new RuntimeException("Ocorre um erro ao listar os horarios. Motivo: " + e.getMessage());
+			}finally {
+				ManagerDb.getInstance().fechar(ps);
+				ManagerDb.getInstance().fechar(rs);
+			}
+			return usuarios;
+		}
+	
 	private Usuario extrairDo(ResultSet rs) {
+		
 		try {
 			
 			String login = rs.getString("login");
