@@ -41,14 +41,52 @@ public class UsuarioService {
 		
 	}
 	
+	public Usuario atualizarPor(String login , String nomeCompleto ,
+								String senhaAntiga ,String senhaNova ) {
+		
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(login),
+					" O login é obrigatorio para atualização");
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(senhaAntiga ),
+					" A senha antiga é obrigatoria para atualização");
+		
+		this.validar(nomeCompleto ,senhaNova);
+		
+		Usuario usuarioSalvo = dao.buscarPor(login);
+		
+		Preconditions.checkNotNull(usuarioSalvo,
+					"não foi encontrado usúario vinculado ao login");
+		
+		String senhaAntigaCriptografada = gerarHashDa(senhaAntiga);
+		
+		boolean isSenhaValida = senhaAntigaCriptografada.equals(usuarioSalvo.getSenha());
+		
+		Preconditions.checkArgument(isSenhaValida);
+		
+		Preconditions.checkArgument(!senhaAntiga.equals(senhaNova),
+					"A senha nova não pode ser igual a anterior");
+		
+		String senhaNovaCriptografada = gerarHashDa(senhaNova);
+		
+		Usuario usuarioAlterado =new Usuario(login, senhaNovaCriptografada, nomeCompleto);
+		
+		this.dao.altera(usuarioAlterado);
+		
+		usuarioAlterado = dao.buscarPor(login);
+		
+		return usuarioAlterado ;
+		
+		
+	}
+	
 	private String removerAcentoDo (String nomeCompleto ) {
-		return Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]" , "");
+		return Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD)
+									.replaceAll("[^\\p{ASCII}]" , "");
 	}
 
 	private List<String> fracionar(String nomeCompleto ){
 		List<String> nomeFracionado = new ArrayList<String>();
 		if (nomeCompleto != null && !nomeCompleto.isBlank()) {
-			
+			nomeCompleto = nomeCompleto.trim();
 			String [] partesDoNome = nomeCompleto.split(" ") ;
 			
 			for (String parte : partesDoNome) {
@@ -60,7 +98,7 @@ public class UsuarioService {
 						&& !parte.equalsIgnoreCase("das");
 				
 				if(isNaoContemArtigo) {
-					nomeFracionado.add(parte.toLowerCase());
+					nomeFracionado.add(parte.toLowerCase().trim());
 				}
 	
 			}
