@@ -9,8 +9,6 @@ public interface DaoUsuario {
 	public void inserir(Usuario usuario );
 	
 	public void altera(Usuario usuario);
-	
-	public void inserirUsuario(String login ,String nomeCompleto ,String senha);
 
 	public Usuario buscarPor(String nome );
 	

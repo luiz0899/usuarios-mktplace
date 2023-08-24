@@ -51,26 +51,6 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 			
 	}
 	
-	@Override
-	public void inserirUsuario(String login ,String nomeCompleto ,String senha) {
-		
-		PreparedStatement ps = null ;
-		
-		try {
-			
-			ps = conexao.prepareStatement(INSERT);
-			ps.setString(1,login);
-			ps.setString(2,nomeCompleto);
-			ps.setString(3,senha);
-			ps.execute();
-			
-		} catch (Exception e) {
-			throw new RuntimeException("Ocorreu um erro ao inserir o usuário . Motivo : " + e.getMessage());
-		}finally {
-			ManagerDb.getInstance().fechar(ps);
-		}
-			
-	}
 
 	@Override
 	public void altera(Usuario usuario) {

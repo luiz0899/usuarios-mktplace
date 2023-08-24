@@ -7,6 +7,10 @@ import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import br.com.senai.usuariosmktplace.core.dao.DaoUsuario;
 import br.com.senai.usuariosmktplace.core.dao.FactoryDao;
 import br.com.senai.usuariosmktplace.core.domain.Usuario;
@@ -21,11 +25,27 @@ public class UsuarioService {
 		
 	}
 	
-	public String removerAcentoDo (String nomeCompleto ) {
+	public Usuario criarPor(String nomeCompleto , String senha ) {
+		
+		this.validar(nomeCompleto, senha);
+		String login = gerarLoginPor(nomeCompleto);
+		String senhaCriptografada = gerarHashDa(senha);
+		Usuario novoUsuario = new Usuario(login, senhaCriptografada, nomeCompleto);
+		
+		this.dao.inserir(novoUsuario);
+		
+		Usuario usuarioSalvo = dao.buscarPor(login) ;
+		
+		return usuarioSalvo;
+		 
+		
+	}
+	
+	private String removerAcentoDo (String nomeCompleto ) {
 		return Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]" , "");
 	}
 
-	public List<String> fracionar(String nomeCompleto ){
+	private List<String> fracionar(String nomeCompleto ){
 		List<String> nomeFracionado = new ArrayList<String>();
 		if (nomeCompleto != null && !nomeCompleto.isBlank()) {
 			
@@ -49,7 +69,7 @@ public class UsuarioService {
 		return nomeFracionado;
 	}
 	
-	public String gerarLoginPor (String nomeCompleto ) {
+	private String gerarLoginPor (String nomeCompleto ) {
 		
 		nomeCompleto = removerAcentoDo(nomeCompleto);
 		List<String> partesDoNome = fracionar(nomeCompleto);
@@ -85,32 +105,49 @@ public class UsuarioService {
 		return loginGerado ;
 		
 	}	
-	public String gerarHashDa(String senha) {
+	private String gerarHashDa(String senha) {
         
-		return new DigestUtils(MessageDigestAlgorithms.MD5).digestAsHex(senha);
+		return new DigestUtils(MessageDigestAlgorithms.SHA3_256).digestAsHex(senha);
         
     }
 	
-	public void salvar(Usuario usuario ) {
+	@SuppressWarnings("deprecation")
+	private void validar(String senha ) {
+								 
+		boolean isSenhaValida = !Strings.isNullOrEmpty(senha) 
+								&& senha.length() >= 6 
+								&& senha.length() <= 15 ;
+						
+		Preconditions.checkArgument(isSenhaValida , "A senha é obrigatoria deve "
+													+ "conter entre 6 e 15 caracteres .");
+								 
+		boolean isContemLetra = CharMatcher.inRange('a', 'z').countIn(senha.toLowerCase()) > 0;
+		boolean isContemNumero =  CharMatcher.inRange('0', '9').countIn(senha) > 0;
+		boolean isCaracterInvalido = !CharMatcher.javaLetterOrDigit().matchesAllOf(senha);
 		
-		String nomeCompleto ;
-		String validaLogin ;
-		String cripitSenha ;
-		
-		nomeCompleto = usuario.getNomeCompleto();
-		validaLogin = this.gerarLoginPor(usuario.getNomeCompleto());
-		cripitSenha = this.gerarHashDa(usuario.getSenha());
-		
-	    this.dao.inserirUsuario(validaLogin,nomeCompleto, cripitSenha);
-
-	}
-	public  void validar(Usuario  usuario) {
-		
-		this.dao.buscarPor(usuario.getNomeCompleto());
+		Preconditions.checkArgument(isContemNumero 
+									&& isContemLetra 
+									&& ! isCaracterInvalido,
+									"A senha deve conter letra e numeros "
+									+ "e não pode aver espaços .");
 			
-
+		
 	}
 	
+	private void validar(String nomeCompleto , String senha) {
+		
+		List<String> partesDoNome = fracionar(nomeCompleto) ;
+		boolean isNomeCompleto = partesDoNome.size() > 1 ;
+		boolean isNomeValido = !Strings.isNullOrEmpty(nomeCompleto) && isNomeCompleto 
+																   && nomeCompleto.length() >= 5
+																   && nomeCompleto.length() <= 120 ;
+																   
+	   Preconditions.checkArgument(isNomeValido,"O nome é obrigatori e deve"
+	   											+ " conter entre 5 e 120 caracteres "
+	   											+ "e conter sobrenome também ");	
+	   this.validar(senha);
+	   
+	}
 	
 	
 }
