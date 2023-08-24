@@ -78,14 +78,14 @@ public class UsuarioService {
 		
 	}
 	
-	private String removerAcentoDo (String nomeCompleto ) {
+	private String removerAcentoDo (String nomeCompleto ){
 		return Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD)
 									.replaceAll("[^\\p{ASCII}]" , "");
 	}
 
 	private List<String> fracionar(String nomeCompleto ){
 		List<String> nomeFracionado = new ArrayList<String>();
-		if (nomeCompleto != null && !nomeCompleto.isBlank()) {
+		if (!Strings.isNullOrEmpty(nomeCompleto)){
 			nomeCompleto = nomeCompleto.trim();
 			String [] partesDoNome = nomeCompleto.split(" ") ;
 			
