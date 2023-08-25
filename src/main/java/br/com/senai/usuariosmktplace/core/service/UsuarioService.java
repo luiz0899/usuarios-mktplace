@@ -123,6 +123,10 @@ public class UsuarioService {
 				usuarioEncontrado = dao.buscarPor(loginGerado);
 				
 				if (usuarioEncontrado == null ) {
+					if (loginGerado.length() > 50) {
+						loginGerado = loginGerado.substring(0,40);
+					}
+					
 					return loginGerado ;
 				}		
 			
@@ -186,6 +190,17 @@ public class UsuarioService {
 	   this.validar(senha);
 	   
 	}
+	public Usuario buscarPor(String  login ) {
+		
+		Preconditions.checkArgument(Strings.isNullOrEmpty(login),
+									"O login é obrigatorio ");
+		Usuario usuarioEncontrado = dao.buscarPor(login);
+		Preconditions.checkNotNull(usuarioEncontrado,"Não foi encontrado"
+												+ "usúario vinculado ao login");
+		return usuarioEncontrado ;
+	
+	}
+	
 	
 	
 }
