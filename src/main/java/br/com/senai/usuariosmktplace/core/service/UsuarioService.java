@@ -172,7 +172,6 @@ public class UsuarioService {
 									&& ! isCaracterInvalido,
 									"A senha deve conter letra e numeros "
 									+ "e não pode aver espaços .");
-			
 		
 	}
 	
