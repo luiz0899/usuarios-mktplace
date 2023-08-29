@@ -65,7 +65,6 @@ public class UsuarioService {
 		Usuario usuarioSalvo = dao.buscarPor(login) ;
 		
 		return usuarioSalvo;
-		 
 		
 	}
 	
