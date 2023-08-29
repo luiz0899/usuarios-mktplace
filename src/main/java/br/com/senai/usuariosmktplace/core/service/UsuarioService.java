@@ -3,6 +3,7 @@ package br.com.senai.usuariosmktplace.core.service;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
@@ -31,6 +32,25 @@ public class UsuarioService {
 		
 		this.dao = factoryDao.getDaoUsuario();
 		
+	}
+	
+	public String resetSenha(String login) {
+		
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(login),
+				"O login é obrigatorio ");
+		
+		Usuario usuarioEncontrado = dao.buscarPor(login);
+			
+		Preconditions.checkNotNull(usuarioEncontrado,"Não foi encontrado"
+				+ "usúario vinculado ao login");
+		
+		String novaSenha = this.gerarRandom();
+		
+		usuarioEncontrado.setSenha(novaSenha);
+	
+		dao.altera(usuarioEncontrado);
+	
+		return novaSenha ;
 	}
 	
 	public Usuario criarPor(String nomeCompleto , String senha ) {
@@ -84,6 +104,21 @@ public class UsuarioService {
 		return usuarioAlterado ;
 		
 		
+	}
+	
+
+	@SuppressWarnings("unused")
+	private Usuario buscarPor(String  login ) {
+		
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(login),
+									"O login é obrigatorio ");
+		
+		Usuario usuarioEncontrado = dao.buscarPor(login);
+		
+		Preconditions.checkNotNull(usuarioEncontrado,"Não foi encontrado"
+												+ "usúario vinculado ao login");
+		return usuarioEncontrado ;
+	
 	}
 	
 	private String removerAcentoDo (String nomeCompleto ){
@@ -155,6 +190,23 @@ public class UsuarioService {
 		return loginGerado ;
 		
 	}	
+	
+	private String gerarRandom() {
+		
+		String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+		Random r = new Random();
+		String c = "" ;
+		
+		for (int i = 0 ; i < 10 ; i++ ){
+			
+			 c += alphabet.charAt(r.nextInt(alphabet.length()));
+		}
+		
+		return c ;
+		
+	}
+	
 	private String gerarHashDa(String senha) {
         
 		return new DigestUtils(MessageDigestAlgorithms.SHA3_256).digestAsHex(senha);
@@ -197,17 +249,5 @@ public class UsuarioService {
 	   this.validar(senha);
 	   
 	}
-	public Usuario buscarPor(String  login ) {
-		
-		Preconditions.checkArgument(Strings.isNullOrEmpty(login),
-									"O login é obrigatorio ");
-		Usuario usuarioEncontrado = dao.buscarPor(login);
-		Preconditions.checkNotNull(usuarioEncontrado,"Não foi encontrado"
-												+ "usúario vinculado ao login");
-		return usuarioEncontrado ;
-	
-	}
-	
-	
 	
 }

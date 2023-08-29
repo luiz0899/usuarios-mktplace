@@ -21,8 +21,6 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 										+" FROM  usuarios u "
 										+"WHERE u.login = ? " ;
 	
-	private final String LIST_USUARIO = "SELECT * FROM usuarios u";
-	
 	private Connection conexao ;
 	
 	public DaoPostgresUsuarios() {
@@ -73,6 +71,8 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 				this.conexao.rollback();
 			}
 			
+			ManagerDb.getInstance().configurarAutocommitDa(conexao, true);
+
 			ManagerDb.getInstance().fechar(ps);
 			
 		} catch (Exception e) {
@@ -96,6 +96,9 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 			if(rs.next()) {
 				return extrairDo(rs);
 			}
+			
+			ManagerDb.getInstance().configurarAutocommitDa(conexao, true);
+
 			return null ;
 						
 		} catch (Exception e) {
@@ -106,32 +109,6 @@ public class DaoPostgresUsuarios implements DaoUsuario {
 
 		}
 	}
-	
-	public List<Usuario> listarPorLogin() {
-			
-			
-			List<Usuario> usuarios = new ArrayList<Usuario>();
-			PreparedStatement ps = null;
-			ResultSet rs = null;
-			try {
-				
-				ps = conexao.prepareStatement(LIST_USUARIO);
-				rs = ps.executeQuery();
-				
-				while (rs.next()) {
-					
-					usuarios.add(extrairDo(rs));
-					
-				}
-				
-			}catch (Exception e) {
-				throw new RuntimeException("Ocorre um erro ao listar os horarios. Motivo: " + e.getMessage());
-			}finally {
-				ManagerDb.getInstance().fechar(ps);
-				ManagerDb.getInstance().fechar(rs);
-			}
-			return usuarios;
-		}
 	
 	private Usuario extrairDo(ResultSet rs) {
 		

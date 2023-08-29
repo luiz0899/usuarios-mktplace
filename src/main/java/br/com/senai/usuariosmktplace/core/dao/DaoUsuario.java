@@ -12,5 +12,5 @@ public interface DaoUsuario {
 
 	public Usuario buscarPor(String nome );
 	
-	public List<Usuario> listarPorLogin(); 
+
 }

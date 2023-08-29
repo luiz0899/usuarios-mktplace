@@ -24,8 +24,9 @@ public class InitApp {
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx ) {
 		
 		return args -> {
-				System.out.println(service.buscarPor("Alan duarte"));
-				System.out.println("aqui");
+
+			System.out.println(service.criarPor("antoni da silva nunes ", "antonio1234")); 
+		
 		};
 	}
 	
